@@ -41,8 +41,11 @@
 | key | value |
 | :---|:--- |
 | src | source text |
-| tgt | target text; bold lines in the article. |
+| tgt | target text; bold lines in the article |
 | title | article title + current part number |
+
+## Related repository
+- English wikiHow summarization dataset: https://github.com/mahnazkoupaee/WikiHow-Dataset
 
 ## License
 The articles are provided by wikiHow.
