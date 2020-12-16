@@ -16,7 +16,7 @@
     - Extract knowledge from the html files crawled in step 1.
         - the extracted info is described in below #json_description.
 3. `python script/make_data.py`
-    - Make train/dev/test data from the json files extracted in step 2 based on `data/divide_data.tsv`.
+    - Make train/dev/test data from the json files extracted in step 2 based on `data/divided_data.tsv`.
         - The detail of the json files is below section.
 
 ### json description
