@@ -16,9 +16,10 @@ def reformat_html2dict(bs4_html):
     content_dict = {'part_title': '', 'part_contents': [],}
     part_content_dict = {'bold_line': '', 'article': ''}
  
+    # delete only zenkaku space
     preprocess_table = str.maketrans({
       '\u3000': '',
-      ' ': '',
+      # ' ': '',
     })
 
     meta_title = bs4_html.find('title').text
