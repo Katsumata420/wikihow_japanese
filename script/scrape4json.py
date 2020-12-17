@@ -15,7 +15,11 @@ def reformat_html2dict(bs4_html):
                     'part_name_exist': False, 'contents': [],}
     content_dict = {'part_title': '', 'part_contents': [],}
     part_content_dict = {'bold_line': '', 'article': ''}
-
+ 
+    preprocess_table = str.maketrans({
+      '\u3000': '',
+      ' ': '',
+    })
 
     meta_title = bs4_html.find('title').text
     parts_article_in_page = bs4_html.find_all('ol', {'class': 'steps_list_2'})
@@ -46,22 +50,64 @@ def reformat_html2dict(bs4_html):
         for paragraph in paragraphs:
             part_content_dict = {'bold_line': '', 'article': ''}
 
-            # delete link and script
+            # delete link, script, image and unicode for paragraph
             while paragraph.find('sup'):
                 paragraph.find('sup').decompose()
             while paragraph.find('script'):
                 paragraph.find('script').decompose()
+            while paragraph.find('a', {'class': 'image'}):
+                paragraph.find('a', {'class': 'image'}).decompose()
+            while paragraph.find('span', {'class': 'Unicode'}):
+                paragraph.find('span', {'class': 'Unicode'}).decompose()
 
             bold_lines = paragraph.find_all('b', {'class': 'whb'})
-            bold_line = ''.join([x.text for x in bold_lines])
+            # bold_lines = paragraph.find_all('b') # whb が tgt になる bold
+
+            def can_find_all(bs4_lists):
+                # O(n^2)
+                flag = True
+                for bs4_item_a in bs4_lists:
+                    for bs4_item_b in bs4_lists:
+                        if bs4_item_a != bs4_item_b and \
+                                str(bs4_item_a) in str(bs4_item_b):
+                            flag = False        
+                            return flag
+                return flag
+
+            if can_find_all(bold_lines):
+                for bold_line in bold_lines:
+                    # delete link, script, image and unicode for bold_line
+                    while bold_line.find('sup'):
+                        bold_line.find('sup').decompose()
+                    while bold_line.find('script'):
+                        bold_line.find('script').decompose()
+                    while bold_line.find('a', {'class': 'image'}):
+                        bold_line.find('a', {'class': 'image'}).decompose()
+                    while bold_line.find('span', {'class': 'Unicode'}):
+                        bold_line.find('span', {'class': 'Unicode'}).decompose()
+                bold_line = ''.join([x.text for x in bold_lines]).strip()
+            else:
+                # delete link, script, image and unicode for bold_line
+                bold_line = paragraph.find('b')
+                while bold_line.find('sup'):
+                    bold_line.find('sup').decompose()
+                while bold_line.find('script'):
+                    bold_line.find('script').decompose()
+                while bold_line.find('a', {'class': 'image'}):
+                    bold_line.find('a', {'class': 'image'}).decompose()
+                while bold_line.find('span', {'class': 'Unicode'}):
+                    bold_line.find('span', {'class': 'Unicode'}).decompose()
+                bold_line = bold_line.text.strip()
         
-            part_content_dict['bold_line'] = bold_line.strip()
-            article  = paragraph.text.strip().replace(bold_line, '')
+            article = paragraph.text.strip().replace(bold_line, '')
+            bold_line = bold_line.translate(preprocess_table).strip()
+            article = article.translate(preprocess_table)
+            part_content_dict['bold_line'] = bold_line
             part_content_dict['article'] = article.replace('\n', '')
 
             content_dict['part_contents'].append(part_content_dict)
 
-            if bold_line.strip() != '' and article.replace('\n', '') != '':
+            if bold_line != '' and article.replace('\n', '') != '':
                 temp_non_missing_count += 1
 
         if temp_non_missing_count == 0:
